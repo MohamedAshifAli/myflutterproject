@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-void main() {
-  runApp(ReminderApp());
+// Reminder model
+class Reminder {
+  final String day;
+  final TimeOfDay time;
+  final String activity;
+
+  Reminder({required this.day, required this.time, required this.activity});
 }
 
-class ReminderApp extends StatelessWidget {
+// FlutterLocalNotificationsPlugin instance
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize notifications plugin
+  final InitializationSettings initializationSettings =
+  InitializationSettings(
+    android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+  );
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,14 +46,20 @@ class ReminderScreen extends StatefulWidget {
 }
 
 class _ReminderScreenState extends State<ReminderScreen> {
-  String selectedDay = 'Monday'; // Initialize with a default day
-  TimeOfDay selectedTime = TimeOfDay.now(); // Initialize with current time
-  String selectedActivity = 'Wake up'; // Initialize with a default activity
+  String selectedDay = 'Monday';
+  TimeOfDay selectedTime = TimeOfDay.now();
+  String selectedActivity = 'Wake up';
 
-  // Define a function to handle reminder creation
+  // Replace with your reminder creation logic (e.g., store in list or database)
   void createReminder() {
-    // Implement reminder creation logic here
-    // This function will be triggered when the user confirms the selection
+    print(
+        'Reminder created: $selectedActivity on $selectedDay at ${selectedTime.format(context)}');
+    // Implement your reminder creation logic here (e.g., display a Snackbar)
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Reminder created for $selectedActivity on $selectedDay at ${selectedTime.format(context)}'),
+      ),
+    );
   }
 
   @override
@@ -51,9 +80,15 @@ class _ReminderScreenState extends State<ReminderScreen> {
                   selectedDay = newValue!;
                 });
               },
-              // Populate days of the week dynamically
-              items: <String>['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-                  .map<DropdownMenuItem<String>>((String value) {
+              items: <String>[
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday'
+              ].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -83,9 +118,17 @@ class _ReminderScreenState extends State<ReminderScreen> {
                   selectedActivity = newValue!;
                 });
               },
-              // Populate activities dynamically
-              items: <String>['Wake up', 'Go to gym', 'Breakfast', 'Meetings', 'Lunch', 'Quick nap', 'Go to library', 'Dinner', 'Go to sleep']
-                  .map<DropdownMenuItem<String>>((String value) {
+              items: <String>[
+                'Wake up',
+                'Go to gym',
+                'Breakfast',
+                'Meetings',
+                'Lunch',
+                'Quick nap',
+                'Go to library',
+                'Dinner',
+                'Go to sleep'
+              ].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -94,9 +137,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
-                createReminder();
-              },
+              onPressed: createReminder,
               child: Text('Set Reminder'),
             ),
           ],
